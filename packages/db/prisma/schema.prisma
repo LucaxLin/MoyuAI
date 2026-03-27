@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Theme {
+  light
+  dark
+  system
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+enum VerificationType {
+  register
+  login
+  reset
+}
+
+enum VerificationType {
+  register
+  login
+  reset
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @db.VarChar(255)
+  name         String?   @db.VarChar(100)
+  avatar       String?   @db.VarChar(500)
+  theme        Theme     @default(system)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  sessions    Session[]
+  messages    Message[]
+  images      Image[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String   @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+  images   Image[]
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Message {
+  id        String      @id @default(uuid())
+  sessionId String      @map("session_id")
+  userId    String      @map("user_id")
+  role      MessageRole
+  content   String      @db.Text
+  imageUrl  String?     @map("image_url") @db.VarChar(500)
+  metadata  Json?
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images  Image[]
+
+  @@index([sessionId])
+  @@index([userId])
+  @@map("messages")
+}
+
+model Image {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  sessionId  String?  @map("session_id")
+  messageId  String?  @map("message_id")
+  url        String   @db.VarChar(500)
+  localPath  String   @map("local_path") @db.VarChar(500)
+  prompt     String?  @db.Text
+  width      Int?
+  height     Int?
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session  Session?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  message  Message?  @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([sessionId])
+  @@map("images")
+}
+
+model Verification {
+  id        String            @id @default(uuid())
+  email     String            @db.VarChar(255)
+  code      String            @db.VarChar(6)
+  type      VerificationType
+  expiresAt DateTime          @map("expires_at")
+  isUsed    Boolean           @default(false) @map("is_used")
+  createdAt DateTime          @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("verifications")
+}

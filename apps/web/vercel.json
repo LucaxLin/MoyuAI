@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && pnpm --filter @moyu/web build",
+  "installCommand": "cd ../.. && pnpm install",
+  "regions": ["hkg1", "sin1"]
+}
