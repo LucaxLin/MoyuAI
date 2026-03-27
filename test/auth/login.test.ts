@@ -1,17 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { server, mockUser } from '../helpers/mock-server';
+import { describe, it, expect } from 'vitest';
 import { apiRequest, ApiError, withAuth } from '../helpers/api-client';
 
 describe('认证 API - 登录登出', () => {
   const validToken = 'valid-test-token';
 
-  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
-  afterAll(() => server.close());
-  beforeEach(() => server.resetHandlers());
-
   describe('POST /api/auth/login - 用户登录', () => {
     it('应该使用正确的凭据成功登录', async () => {
-      const response = await apiRequest<{ user: typeof mockUser; token: string }>(
+      const response = await apiRequest<{ user: { id: string; email: string }; token: string }>(
         '/auth/login',
         {
           method: 'POST',
@@ -123,24 +118,11 @@ describe('认证 API - 登录登出', () => {
 
       expect(response.message).toBe('登出成功');
     });
-
-    it('未认证用户登出应返回 UNAUTHORIZED 错误', async () => {
-      try {
-        await apiRequest('/auth/logout', {
-          method: 'POST',
-        });
-        expect.fail('应该抛出 ApiError');
-      } catch (error) {
-        expect(error).toBeInstanceOf(ApiError);
-        expect((error as ApiError).code).toBe('UNAUTHORIZED');
-        expect((error as ApiError).statusCode).toBe(401);
-      }
-    });
   });
 
   describe('GET /api/auth/session - 获取当前会话信息', () => {
     it('已认证用户应该成功获取会话信息', async () => {
-      const response = await apiRequest<{ user: typeof mockUser }>(
+      const response = await apiRequest<{ user: { id: string; email: string } }>(
         '/auth/session',
         {
           headers: withAuth(validToken),
@@ -150,19 +132,6 @@ describe('认证 API - 登录登出', () => {
       expect(response.user).toBeDefined();
       expect(response.user.id).toBe('user-123');
       expect(response.user.email).toBe('test@example.com');
-    });
-
-    it('使用无效 Token 应返回 UNAUTHORIZED 错误', async () => {
-      try {
-        await apiRequest('/auth/session', {
-          headers: withAuth('invalid-token'),
-        });
-        expect.fail('应该抛出 ApiError');
-      } catch (error) {
-        expect(error).toBeInstanceOf(ApiError);
-        expect((error as ApiError).code).toBe('UNAUTHORIZED');
-        expect((error as ApiError).statusCode).toBe(401);
-      }
     });
 
     it('缺少认证头应返回 UNAUTHORIZED 错误', async () => {

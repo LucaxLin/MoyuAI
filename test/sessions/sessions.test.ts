@@ -1,15 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { server, mockSession } from '../helpers/mock-server';
+import { describe, it, expect } from 'vitest';
 import { apiRequest, ApiError, withAuth, Pagination } from '../helpers/api-client';
 import type { Session } from '../helpers/api-client';
 
 describe('会话 API', () => {
   const validToken = 'valid-test-token';
   const sessionId = 'session-123';
-
-  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
-  afterAll(() => server.close());
-  beforeEach(() => server.resetHandlers());
 
   describe('GET /api/sessions - 获取用户所有会话列表', () => {
     it('已认证用户应该成功获取会话列表', async () => {

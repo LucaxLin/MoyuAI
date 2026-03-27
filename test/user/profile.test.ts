@@ -1,14 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { server, mockUser } from '../helpers/mock-server';
+import { describe, it, expect } from 'vitest';
 import { apiRequest, ApiError, withAuth } from '../helpers/api-client';
 import type { User } from '../helpers/api-client';
 
 describe('用户设置 API', () => {
   const validToken = 'valid-test-token';
-
-  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
-  afterAll(() => server.close());
-  beforeEach(() => server.resetHandlers());
 
   describe('GET /api/user/profile - 获取用户信息', () => {
     it('已认证用户应该成功获取自己的用户信息', async () => {
@@ -20,8 +15,8 @@ describe('用户设置 API', () => {
       );
 
       expect(response.user).toBeDefined();
-      expect(response.user.id).toBe(mockUser.id);
-      expect(response.user.email).toBe(mockUser.email);
+      expect(response.user.id).toBe('user-123');
+      expect(response.user.email).toBe('test@example.com');
     });
 
     it('用户信息应该包含必要字段', async () => {
@@ -154,7 +149,7 @@ describe('用户设置 API', () => {
         }
       );
 
-      expect(response.user.email).toBe(mockUser.email);
+      expect(response.user.email).toBe('test@example.com');
     });
 
     it('未认证用户应返回 UNAUTHORIZED 错误', async () => {
