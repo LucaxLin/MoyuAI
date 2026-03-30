@@ -45,11 +45,11 @@ export async function GET(request: NextRequest) {
       {
         success: true,
         data: {
-          sessions: sessions.map((s) => ({
+          sessions: sessions.map((s: any) => ({
             id: s.id,
             title: s.title,
-            createdAt: s.createdAt.toISOString(),
-            updatedAt: s.updatedAt.toISOString(),
+            createdAt: s.createdAt,
+            updatedAt: s.updatedAt,
             messageCount: s._count.messages,
           })),
         },
