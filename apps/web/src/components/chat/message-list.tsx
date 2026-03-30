@@ -203,7 +203,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage, userAv
             <p className="whitespace-pre-wrap">{message.content}</p>
           </div>
           {message.imageUrl && (
-            <div className="relative group">
+            <div className="relative">
               <img
                 src={getBlobProxyUrl(message.imageUrl)}
                 alt="Generated"
@@ -214,7 +214,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage, userAv
                 }}
                 className="rounded-xl max-w-full cursor-pointer hover:opacity-90 transition-opacity"
               />
-              <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
+              <div className="absolute bottom-2 right-2 flex gap-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
