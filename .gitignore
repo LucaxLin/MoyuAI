@@ -42,12 +42,15 @@ packages/db/prisma/*.db
 packages/db/prisma/*.db-journal
 
 # images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-*.svg
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.webp
+# *.svg
+
+# except specific images
+!apps/web/public/moyu.png
 
 # logs
 logs/
