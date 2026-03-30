@@ -48,8 +48,8 @@ export async function GET(request: NextRequest) {
           sessions: sessions.map((s) => ({
             id: s.id,
             title: s.title,
-            createdAt: s.createdAt,
-            updatedAt: s.updatedAt,
+            createdAt: s.createdAt.toISOString(),
+            updatedAt: s.updatedAt.toISOString(),
             messageCount: s._count.messages,
           })),
         },
