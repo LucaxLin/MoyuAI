@@ -1,10 +1,28 @@
 import fs from "fs";
 import path from "path";
 
-const LOG_DIR = path.join(process.cwd(), "logs");
+const IS_VERCEL = !!process.env.VERCEL;
 
-if (!fs.existsSync(LOG_DIR)) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
+let LOG_DIR = "";
+let logInitialized = false;
+
+function initLogger(): void {
+  if (logInitialized) return;
+  
+  if (IS_VERCEL) {
+    logInitialized = true;
+    return;
+  }
+  
+  try {
+    LOG_DIR = path.join(process.cwd(), "logs");
+    if (!fs.existsSync(LOG_DIR)) {
+      fs.mkdirSync(LOG_DIR, { recursive: true });
+    }
+    logInitialized = true;
+  } catch {
+    logInitialized = true;
+  }
 }
 
 function getLogFileName(): string {
@@ -37,34 +55,40 @@ function formatMessage(level: string, tag: string, message: string, data?: unkno
 }
 
 function writeToFile(message: string): void {
+  if (IS_VERCEL || !LOG_DIR) return;
+  
   try {
     const logPath = getLogFilePath();
     fs.appendFileSync(logPath, message + "\n", "utf-8");
-  } catch (error) {
-    console.error("Failed to write log to file:", error);
+  } catch {
+    // silently fail
   }
 }
 
 export const logger = {
   info(tag: string, message: string, data?: unknown): void {
+    initLogger();
     const formattedMessage = formatMessage("INFO", tag, message, data);
     console.log(formattedMessage);
     writeToFile(formattedMessage);
   },
 
   error(tag: string, message: string, data?: unknown): void {
+    initLogger();
     const formattedMessage = formatMessage("ERROR", tag, message, data);
     console.error(formattedMessage);
     writeToFile(formattedMessage);
   },
 
   warn(tag: string, message: string, data?: unknown): void {
+    initLogger();
     const formattedMessage = formatMessage("WARN", tag, message, data);
     console.warn(formattedMessage);
     writeToFile(formattedMessage);
   },
 
   debug(tag: string, message: string, data?: unknown): void {
+    initLogger();
     const formattedMessage = formatMessage("DEBUG", tag, message, data);
     console.debug(formattedMessage);
     writeToFile(formattedMessage);

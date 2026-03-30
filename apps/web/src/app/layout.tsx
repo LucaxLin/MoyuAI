@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "墨语 - AI驱动的创意画布",
   description: "通过自然语言描述，快速生成高质量的AI艺术作品",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/moyu.png",
   },
 };
 
