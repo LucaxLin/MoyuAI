@@ -1,9 +1,7 @@
 import NextAuth, { type NextAuthOptions, type DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@moyu/db";
+import { prisma } from "@moyu/db";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 declare module "next-auth" {
   interface Session extends DefaultSession {

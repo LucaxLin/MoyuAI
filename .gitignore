@@ -48,3 +48,7 @@ packages/db/prisma/*.db-journal
 *.gif
 *.webp
 *.svg
+
+# logs
+logs/
+*.log

@@ -1,29 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { SessionList } from "./session-list";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 import { useSessions, useMessages } from "@/hooks/useChat";
 import { type Session } from "@/store/chatStore";
-import { Menu, X, Moon, Sun, Settings, User } from "lucide-react";
+import { Menu, X, Moon, Sun, Settings, BookImage } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 
 export function ChatPage({ sessionId }: { sessionId?: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const { currentSession, setCurrentSession, fetchMessages, addMessage } = useMessages();
-  const { sessions, fetchSessions, createSession } = useSessions();
+  const { fetchMessages, addMessage, setUploadedImage } = useMessages();
+  const { currentSession, sessions, fetchSessions, createSession, setCurrentSession } = useSessions();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [refImage, setRefImage] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const refImageParam = searchParams.get("refImage");
+    if (refImageParam) {
+      setRefImage(decodeURIComponent(refImageParam));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -32,15 +42,19 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
   }, [status, router]);
 
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId && sessions.length > 0) {
       const existingSession = sessions.find(s => s.id === sessionId);
-      if (existingSession) {
+      if (existingSession && existingSession.id !== currentSession?.id) {
         setCurrentSession(existingSession);
       }
     }
-  }, [sessionId, sessions, setCurrentSession]);
+  }, [sessionId, sessions, setCurrentSession, currentSession]);
 
   const handleSelectSession = async (selectedSession: Session) => {
+    if (selectedSession.id === sessionId) {
+      return;
+    }
+    
     setCurrentSession(selectedSession);
     router.push(`/chat/${selectedSession.id}`);
   };
@@ -48,15 +62,30 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
   const handleSendMessage = async (content: string, imageUrl?: string | null) => {
     let targetSession = currentSession;
     
-    if (!targetSession) {
+    if (!sessionId) {
       const result = await createSession();
       if (!result.success || !result.session) return;
       targetSession = result.session;
       setCurrentSession(targetSession);
       router.push(`/chat/${targetSession.id}`);
+      return;
     }
 
-    await fetchMessages(targetSession.id);
+    if (targetSession?.id !== sessionId) {
+      const existingSession = sessions.find(s => s.id === sessionId);
+      if (existingSession) {
+        targetSession = existingSession;
+        setCurrentSession(existingSession);
+      } else {
+        await fetchSessions();
+        const foundSession = sessions.find(s => s.id === sessionId);
+        if (foundSession) {
+          targetSession = foundSession;
+          setCurrentSession(foundSession);
+        }
+      }
+    }
+
     await addMessage({
       id: `temp-${Date.now()}`,
       role: "user",
@@ -65,16 +94,23 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
       createdAt: new Date().toISOString(),
     });
 
-    const response = await fetch(`/api/sessions/${targetSession.id}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, imageUrl }),
-    });
+    setIsGenerating(true);
 
-    const data = await response.json();
-    
-    if (data.success && data.data?.message) {
-      await fetchMessages(targetSession.id);
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, imageUrl }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.data?.message) {
+        await fetchMessages(sessionId);
+      }
+    } finally {
+      setIsGenerating(false);
+      setUploadedImage(null);
     }
   };
 
@@ -82,12 +118,15 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  if (status === "loading" || !mounted) {
+  if (!mounted || status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-gray-500">加载中...</div>
-      </div>
+      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900" />
     );
+  }
+
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return null;
   }
 
   return (
@@ -114,8 +153,9 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
           <Link
             href="/gallery"
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            title="我的图库"
           >
-            <User className="w-5 h-5" />
+            <BookImage className="w-5 h-5" />
           </Link>
           <Link
             href="/settings"
@@ -136,18 +176,23 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
         >
           <SessionList
             onSelectSession={handleSelectSession}
-            selectedSessionId={currentSession?.id}
+            selectedSessionId={sessionId || currentSession?.id}
           />
         </div>
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col">
           <MessageList
-            sessionId={currentSession?.id || ""}
+            sessionId={sessionId || ""}
+            isGenerating={isGenerating}
+            onQuoteImage={(imageUrl) => setRefImage(imageUrl)}
           />
           <ChatInput
-            sessionId={currentSession?.id || ""}
+            sessionId={sessionId || ""}
             onSend={handleSendMessage}
+            disabled={isGenerating}
+            initialImage={refImage}
+            onInitialImageUsed={() => setRefImage(null)}
           />
         </div>
       </div>

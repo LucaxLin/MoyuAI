@@ -3,15 +3,22 @@
 import { useEffect, useRef } from "react";
 import { useMessages } from "@/hooks/useChat";
 import { type Message } from "@/store/chatStore";
-import { Heart, Download, Edit, Image as ImageIcon } from "lucide-react";
+import { Heart, Download, Edit, Image as ImageIcon, Reply } from "lucide-react";
+import { getBlobProxyUrl } from "@/lib/blob-utils";
+import { GeneratingIndicator } from "./generating-indicator";
+import { ImageSkeleton } from "./image-skeleton";
+import { AIAvatar } from "@/components/common/ai-avatar";
+import { toast } from "react-hot-toast";
 
 interface MessageListProps {
   sessionId: string;
+  isGenerating?: boolean;
   onImageClick?: (imageUrl: string) => void;
   onFavorite?: (imageUrl: string) => void;
+  onQuoteImage?: (imageUrl: string) => void;
 }
 
-export function MessageList({ sessionId, onImageClick, onFavorite }: MessageListProps) {
+export function MessageList({ sessionId, isGenerating = false, onImageClick, onFavorite, onQuoteImage }: MessageListProps) {
   const { messages, isSending, fetchMessages } = useMessages();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -55,19 +62,15 @@ export function MessageList({ sessionId, onImageClick, onFavorite }: MessageList
             message={message}
             onImageClick={onImageClick}
             onFavorite={onFavorite}
+            onQuoteImage={onQuoteImage}
           />
         ))}
-        {isSending && (
+        {isGenerating && (
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium">
-              AI
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
+            <AIAvatar size="md" />
+            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm flex-1 max-w-xl">
+              <GeneratingIndicator message="正在生成图片，请稍候..." />
+              <ImageSkeleton width={512} height={288} />
             </div>
           </div>
         )}
@@ -81,21 +84,72 @@ interface MessageBubbleProps {
   message: Message;
   onImageClick?: (imageUrl: string) => void;
   onFavorite?: (imageUrl: string) => void;
+  onQuoteImage?: (imageUrl: string) => void;
 }
 
-function MessageBubble({ message, onImageClick, onFavorite }: MessageBubbleProps) {
+function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: MessageBubbleProps) {
   const isUser = message.role === "user";
+
+  const handleFavorite = async (imageUrl: string) => {
+    try {
+      const response = await fetch("/api/gallery/favorite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast.success("已添加到收藏");
+      } else {
+        toast.error(result.error?.message || "收藏失败");
+      }
+    } catch (error) {
+      toast.error("收藏失败，请稍后重试");
+    }
+  };
+
+  const handleDownload = async (imageUrl: string) => {
+    try {
+      const proxyUrl = getBlobProxyUrl(imageUrl);
+      const response = await fetch(proxyUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `moyu-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("下载成功");
+    } catch (error) {
+      toast.error("下载失败，请稍后重试");
+    }
+  };
+
+  const handleCopyLink = (imageUrl: string) => {
+    navigator.clipboard.writeText(imageUrl).then(() => {
+      toast.success("链接已复制到剪贴板");
+    }).catch(() => {
+      toast.error("复制失败");
+    });
+  };
+
+  const handleQuoteImage = (imageUrl: string) => {
+    onQuoteImage?.(imageUrl);
+    toast.success("已引用图片到输入框");
+  };
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={`flex items-start gap-3 max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}>
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0 ${
-            isUser ? "bg-indigo-600" : "bg-green-600"
-          }`}
-        >
-          {isUser ? "U" : "AI"}
-        </div>
+        {isUser ? (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0 bg-purple-600">
+            8
+          </div>
+        ) : (
+          <AIAvatar size="md" />
+        )}
         <div className="flex flex-col gap-2">
           <div
             className={`px-4 py-2 rounded-lg ${
@@ -109,31 +163,41 @@ function MessageBubble({ message, onImageClick, onFavorite }: MessageBubbleProps
           {message.imageUrl && (
             <div className="relative group">
               <img
-                src={message.imageUrl}
+                src={getBlobProxyUrl(message.imageUrl)}
                 alt="Generated"
                 onClick={() => onImageClick?.(message.imageUrl!)}
                 className="rounded-lg max-w-full cursor-pointer hover:opacity-90 transition-opacity"
               />
-              <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
                 <button
-                  onClick={() => onFavorite?.(message.imageUrl!)}
-                  className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <Heart className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => window.open(message.imageUrl, "_blank")}
-                  className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(message.imageUrl!);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFavorite(message.imageUrl!);
                   }}
-                  className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 backdrop-blur-sm"
+                  title="收藏"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Heart className="w-4 h-4 text-pink-500" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(message.imageUrl!);
+                  }}
+                  className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 backdrop-blur-sm"
+                  title="下载"
+                >
+                  <Download className="w-4 h-4 text-blue-500" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleQuoteImage(message.imageUrl!);
+                  }}
+                  className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 backdrop-blur-sm"
+                  title="引用图片"
+                >
+                  <Reply className="w-4 h-4 text-green-500" />
                 </button>
               </div>
             </div>

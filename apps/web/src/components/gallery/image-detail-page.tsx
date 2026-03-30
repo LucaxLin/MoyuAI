@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGallery } from "@/hooks/useGallery";
+import { useSessions } from "@/hooks/useChat";
 import { ArrowLeft, Download, Heart, Trash2, Edit } from "lucide-react";
-import Link from "next/link";
-
+import { toast } from "react-hot-toast";
+import { getBlobProxyUrl } from "@/lib/blob-utils";
 interface ImageDetailPageProps {
   imageId: string;
   onBack: () => void;
@@ -14,6 +15,7 @@ interface ImageDetailPageProps {
 export function ImageDetailPage({ imageId, onBack }: ImageDetailPageProps) {
   const router = useRouter();
   const { currentImage, fetchImage, toggleFavorite, deleteImage } = useGallery();
+  const { createSession } = useSessions();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -36,15 +38,43 @@ export function ImageDetailPage({ imageId, onBack }: ImageDetailPageProps) {
     }
   };
 
-  const handleDownload = () => {
-    if (currentImage) {
-      window.open(currentImage.url, "_blank");
+  const handleDownload = async () => {
+    if (!currentImage) return;
+
+    try {
+      const proxyUrl = getBlobProxyUrl(currentImage.url);
+      const response = await fetch(proxyUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `moyu-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("下载成功");
+    } catch (error) {
+      toast.error("下载失败，请稍后重试");
     }
   };
 
-  const handleEdit = () => {
-    if (currentImage) {
-      router.push(`/chat?image=${currentImage.id}`);
+  const handleEdit = async () => {
+    if (!currentImage) return;
+
+    try {
+      const title = `引用创作：${currentImage.prompt?.slice(0, 30) || "无标题"}${currentImage.prompt && currentImage.prompt.length > 30 ? "..." : ""}`;
+      const result = await createSession(title);
+      
+      if (result.success && result.session) {
+        const sessionId = result.session.id;
+        const imageUrl = currentImage.url;
+        router.push(`/chat/${sessionId}?refImage=${encodeURIComponent(imageUrl)}`);
+      } else {
+        toast.error("创建会话失败");
+      }
+    } catch (error) {
+      toast.error("创建会话失败");
     }
   };
 
@@ -86,7 +116,7 @@ export function ImageDetailPage({ imageId, onBack }: ImageDetailPageProps) {
         {/* Image */}
         <div className="relative bg-white dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
           <img
-            src={currentImage.url}
+            src={getBlobProxyUrl(currentImage.url)}
             alt={currentImage.prompt || "Generated image"}
             className="w-full h-auto"
           />

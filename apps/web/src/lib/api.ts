@@ -1,15 +1,3 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "./auth";
-
-export async function getSession() {
-  return await getServerSession(authOptions);
-}
-
-export async function getCurrentUser() {
-  const session = await getSession();
-  return session?.user;
-}
-
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -112,7 +100,7 @@ export const authApi = {
 
   logout: () => api.post("/api/auth/logout"),
 
-  getSession: () => api.get("/api/auth/session"),
+  getSession: () => api.get("/api/user/session"),
 };
 
 export const userApi = {

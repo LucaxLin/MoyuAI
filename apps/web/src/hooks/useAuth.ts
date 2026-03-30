@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, signOut, useSession, update } from "next-auth/react";
 import { useAuthStore, type User } from "@/store/authStore";
 import { authApi, userApi } from "@/lib/api";
 import { toast } from "react-hot-toast";
@@ -20,22 +20,29 @@ export function useAuth() {
   const login = useCallback(async (email: string, password: string) => {
     try {
       setLoading(true);
-      const result = await authApi.login(email, password);
       
-      if (result.success && result.data?.user) {
-        setUser(result.data.user as User);
-        await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        });
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("邮箱或密码错误");
+        return { success: false, error: { code: "INVALID_CREDENTIALS", message: "邮箱或密码错误" } };
+      }
+
+      const sessionResult = await authApi.getSession();
+      if (sessionResult.success && sessionResult.data?.user) {
+        setUser(sessionResult.data.user as User);
         toast.success("登录成功");
         return { success: true };
       } else {
-        toast.error(result.error?.message || "登录失败");
-        return { success: false, error: result.error };
+        toast.error("登录状态获取失败");
+        return { success: false };
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast.error("登录失败，请稍后重试");
       return { success: false };
     } finally {
@@ -58,15 +65,23 @@ export function useAuth() {
     try {
       const result = await userApi.updateProfile(data);
       
+      console.log("updateProfile result:", result);
+      
       if (result.success && result.data?.user) {
-        setUser(result.data.user as User);
+        const updatedUser = result.data.user as User;
+        console.log("Updated user:", updatedUser);
+        console.log("Updating with avatar:", updatedUser.avatar);
+        setUser(updatedUser);
+        await update({ name: updatedUser.name, avatar: updatedUser.avatar });
         toast.success("更新成功");
         return { success: true };
       } else {
+        console.error("Update profile failed:", result.error);
         toast.error(result.error?.message || "更新失败");
         return { success: false, error: result.error };
       }
     } catch (error) {
+      console.error("Update profile error:", error);
       toast.error("更新失败，请稍后重试");
       return { success: false };
     }

@@ -1,23 +1,42 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMessages } from "@/hooks/useChat";
 import { Send, Image as ImageIcon, X } from "lucide-react";
+import { getBlobProxyUrl } from "@/lib/blob-utils";
 
 interface ChatInputProps {
   sessionId: string;
   onSend: (content: string, imageUrl?: string | null) => void;
+  disabled?: boolean;
+  initialImage?: string | null;
+  onInitialImageUsed?: () => void;
 }
 
-export function ChatInput({ sessionId, onSend }: ChatInputProps) {
+export function ChatInput({ 
+  sessionId, 
+  onSend, 
+  disabled = false,
+  initialImage,
+  onInitialImageUsed 
+}: ChatInputProps) {
   const [content, setContent] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const { uploadedImage, uploadImage, setUploadedImage, isSending } = useMessages();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (initialImage && !uploadedImage) {
+      setUploadedImage(initialImage);
+      onInitialImageUsed?.();
+    }
+  }, [initialImage, uploadedImage, setUploadedImage, onInitialImageUsed]);
+
+  const isDisabled = disabled || isSending;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() || isSending || !sessionId) return;
+    if (!content.trim() || isDisabled) return;
 
     onSend(content, uploadedImage);
     setContent("");
@@ -59,17 +78,13 @@ export function ChatInput({ sessionId, onSend }: ChatInputProps) {
     setUploadedImage(null);
   };
 
-  if (!sessionId) {
-    return null;
-  }
-
   return (
     <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
       <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
         {uploadedImage && (
           <div className="mb-3 relative inline-block">
             <img
-              src={uploadedImage}
+              src={getBlobProxyUrl(uploadedImage)}
               alt="Uploaded"
               className="h-20 w-20 object-cover rounded-lg"
             />
@@ -90,13 +105,13 @@ export function ChatInput({ sessionId, onSend }: ChatInputProps) {
             onChange={handleFileChange}
             accept="image/jpeg,image/png,image/webp,image/gif"
             className="hidden"
-            disabled={isSending || isUploading}
+            disabled={isDisabled || isUploading}
           />
           
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isSending || isUploading}
+            disabled={isDisabled || isUploading}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
           >
             <ImageIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -107,9 +122,9 @@ export function ChatInput({ sessionId, onSend }: ChatInputProps) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="请描述你想要生成的图片..."
+              placeholder={isDisabled ? "正在生成中..." : "请描述你想要生成的图片..."}
               rows={1}
-              disabled={isSending}
+              disabled={isDisabled}
               className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-500 disabled:opacity-50"
               style={{
                 minHeight: "42px",
@@ -120,7 +135,7 @@ export function ChatInput({ sessionId, onSend }: ChatInputProps) {
 
           <button
             type="submit"
-            disabled={!content.trim() || isSending}
+            disabled={!content.trim() || isDisabled}
             className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
           >
             <Send className="w-5 h-5" />

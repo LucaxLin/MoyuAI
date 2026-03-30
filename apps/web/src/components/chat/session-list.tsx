@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSessions } from "@/hooks/useChat";
 import { type Session } from "@/store/chatStore";
-import { MessageSquare, Plus, Trash2 } from "lucide-react";
+import { MessageSquare, Plus, Trash2, Check, X } from "lucide-react";
 
 interface SessionListProps {
   onSelectSession: (session: Session) => void;
@@ -12,10 +12,16 @@ interface SessionListProps {
 
 export function SessionList({ onSelectSession, selectedSessionId }: SessionListProps) {
   const { sessions, isLoading, fetchSessions, createSession, deleteSession } = useSessions();
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    if (initialLoad && sessions.length === 0) {
+      fetchSessions().finally(() => setInitialLoad(false));
+    } else {
+      setInitialLoad(false);
+    }
+  }, [fetchSessions, sessions.length, initialLoad]);
 
   const handleCreateSession = async () => {
     const result = await createSession();
@@ -24,11 +30,20 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
     }
   };
 
-  const handleDeleteSession = async (e: React.MouseEvent, id: string) => {
+  const handleShowDeleteConfirm = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (confirm("确定要删除这个会话吗？")) {
-      await deleteSession(id);
-    }
+    setConfirmDeleteId(id);
+  };
+
+  const handleCancelDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setConfirmDeleteId(null);
+  };
+
+  const handleConfirmDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    await deleteSession(id);
+    setConfirmDeleteId(null);
   };
 
   return (
@@ -44,11 +59,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {isLoading ? (
-          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-            加载中...
-          </div>
-        ) : sessions.length === 0 ? (
+        {sessions.length === 0 ? (
           <div className="p-4 text-center text-gray-500 dark:text-gray-400">
             暂无会话
           </div>
@@ -68,12 +79,32 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                   <MessageSquare className="w-4 h-4 flex-shrink-0 text-gray-400" />
                   <span className="truncate text-sm">{session.title || "新会话"}</span>
                 </div>
-                <button
-                  onClick={(e) => handleDeleteSession(e, session.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-opacity"
-                >
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </button>
+                {confirmDeleteId === session.id ? (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => handleConfirmDelete(e, session.id)}
+                      className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                      title="确认删除"
+                    >
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </button>
+                    <button
+                      onClick={handleCancelDelete}
+                      className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                      title="取消删除"
+                    >
+                      <X className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => handleShowDeleteConfirm(e, session.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-opacity"
+                    title="删除会话"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </button>
+                )}
               </div>
             ))}
           </div>

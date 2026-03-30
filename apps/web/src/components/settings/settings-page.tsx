@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,12 +15,15 @@ export function SettingsPage() {
   const { user, updateProfile, updatePassword, updateTheme, logout, isLoading } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const [name, setName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedTheme, setSelectedTheme] = useState<"light" | "dark" | "system">("system");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -34,10 +37,17 @@ export function SettingsPage() {
 
   useEffect(() => {
     if (user) {
+      console.log("Settings page - user updated:", user);
+      console.log("Settings page - user avatar:", user.avatar);
       setName(user.name || "");
       setSelectedTheme((user.theme as "light" | "dark" | "system") || "system");
     }
   }, [user]);
+
+  useEffect(() => {
+    console.log("Settings page - session updated:", session);
+    console.log("Settings page - session user avatar:", session?.user?.avatar);
+  }, [session]);
 
   const handleSaveProfile = async () => {
     const result = await updateProfile({ name });
@@ -83,6 +93,52 @@ export function SettingsPage() {
     }
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("请选择图片文件");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("图片大小不能超过5MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAvatarPreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setIsUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data?.url) {
+        const avatarUrl = result.data.url;
+        await updateProfile({ avatar: avatarUrl });
+        setAvatarPreview(null);
+      } else {
+        toast.error(result.error?.message || "头像上传失败");
+      }
+    } catch (error) {
+      toast.error("头像上传失败，请稍后重试");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   if (status === "loading" || !mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -124,12 +180,41 @@ export function SettingsPage() {
                 头像
               </label>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xl font-bold">
-                  {user?.email?.[0]?.toUpperCase() || "U"}
+                {avatarPreview || user?.avatar ? (
+                  <div className="relative">
+                    <img
+                      src={avatarPreview || user?.avatar}
+                      alt="Avatar"
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-white text-xl font-bold">
+                    {name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
+                  </div>
+                )}
+                <div className="flex flex-col gap-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="text-sm text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingAvatar ? "上传中..." : "点击更换头像"}
+                  </button>
+                  <span className="text-xs text-gray-400">支持 JPG、PNG，最大 5MB</span>
                 </div>
-                <button className="text-sm text-indigo-600 hover:text-indigo-500">
-                  点击更换头像
-                </button>
               </div>
             </div>
 

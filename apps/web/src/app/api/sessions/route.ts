@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const validation = createSessionSchema.safeParse(body);
 
-    const title = validation.success ? validation.data.title : "新会话";
+    const title = validation.success ? validation.data.title || "新会话" : "新会话";
 
     const newSession = await prisma.session.create({
       data: {

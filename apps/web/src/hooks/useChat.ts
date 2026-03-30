@@ -210,5 +210,7 @@ export function useMessages() {
     deleteMessage,
     uploadImage,
     setUploadedImage,
+    addMessage,
+    setMessages,
   };
 }

@@ -2,6 +2,7 @@
 
 import { type GalleryImage } from "@/store/galleryStore";
 import { Heart } from "lucide-react";
+import { getBlobProxyUrl } from "@/lib/blob-utils";
 
 interface ImageCardProps {
   image: GalleryImage;
@@ -15,7 +16,7 @@ export function ImageCard({ image, onClick }: ImageCardProps) {
       className="relative group cursor-pointer overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800"
     >
       <img
-        src={image.url}
+        src={getBlobProxyUrl(image.url)}
         alt={image.prompt || "Generated image"}
         className="w-full h-auto object-cover transition-transform group-hover:scale-105"
         loading="lazy"

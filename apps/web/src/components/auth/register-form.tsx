@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast";
 
 export function RegisterForm() {
   const router = useRouter();
-  const [step, setStep] = useState<"form" | "verify"> = "form";
+  const [step, setStep] = useState<"form" | "verify">("form");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
