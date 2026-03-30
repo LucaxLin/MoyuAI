@@ -8,6 +8,7 @@ import { Moon, Sun, Monitor, MessageSquare, User as UserIcon, Settings } from "l
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { toast } from "react-hot-toast";
+import { MoyuLogo } from "@/components/common/moyu-logo";
 
 export function SettingsPage() {
   const router = useRouter();
@@ -150,9 +151,10 @@ export function SettingsPage() {
   return (
     <div className="h-screen w-full bg-cream-100 dark:bg-warm-dark flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-card dark:bg-card border-b border-border px-4 py-3 flex items-center justify-between flex-shrink-0 safe-top">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-foreground">设置</h1>
+      <header className="bg-card dark:bg-card border-b border-border px-4 py-4 md:py-5 flex items-center justify-between flex-shrink-0 pt-safe-top">
+        <div className="flex items-center gap-2">
+          <MoyuLogo className="w-8 h-8 md:w-10 md:h-10" />
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">设置</h1>
         </div>
 
         <div className="flex items-center gap-1">

@@ -9,6 +9,7 @@ import { ImageDetailPage } from "./image-detail-page";
 import { Moon, Sun, Settings, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { MoyuLogo } from "@/components/common/moyu-logo";
 
 export function GalleryPage() {
   const router = useRouter();
@@ -59,9 +60,10 @@ export function GalleryPage() {
   return (
     <div className="min-h-screen w-full bg-cream-100 dark:bg-warm-dark">
       {/* Header */}
-      <header className="bg-card dark:bg-card border-b border-border px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-foreground">我的图库</h1>
+      <header className="bg-card dark:bg-card border-b border-border px-4 py-4 md:py-5 flex items-center justify-between sticky top-0 z-10 pt-safe-top">
+        <div className="flex items-center gap-2">
+          <MoyuLogo className="w-8 h-8 md:w-10 md:h-10" />
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">我的图库</h1>
         </div>
 
         <div className="flex items-center gap-1">

@@ -12,46 +12,26 @@ export function AIAvatar({ size = "md", className = "" }: AIAvatarProps) {
     lg: "w-12 h-12",
   };
 
-  const iconSizes = {
-    sm: 12,
-    md: 16,
-    lg: 24,
-  };
-
   return (
     <div
-      className={`${sizeClasses[size]} rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 ${className}`}
+      className={`${sizeClasses[size]} rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-amber-200 via-orange-300 to-yellow-400 ${className}`}
     >
       <svg
-        width={iconSizes[size]}
-        height={iconSizes[size]}
+        width={size === "sm" ? 12 : size === "md" ? 16 : 24}
+        height={size === "sm" ? 12 : size === "md" ? 16 : 24}
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="text-white drop-shadow-lg"
       >
         <path
-          d="M12 2L2 7L12 12L22 7L12 2Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z"
           fill="currentColor"
-          fillOpacity="0.2"
         />
         <path
-          d="M2 17L12 22L22 17"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M2 12L12 17L22 12"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M20 18H18C18 14.69 16.07 11.84 13.28 10.38C13.62 9.88 13.84 9.29 13.84 8.64C13.84 6.13 11.71 4 9.2 4C6.69 4 4.56 6.13 4.56 8.64C4.56 9.29 4.78 9.88 5.12 10.38C2.33 11.84 0.4 14.69 0.4 18H2.4C2.4 15.59 4.19 13.59 6.56 13.09C6.89 13.03 7.2 13.17 7.36 13.47L8.08 14.81C8.29 15.21 8.66 15.45 9.08 15.45H15.32C15.74 15.45 16.11 15.21 16.32 14.81L17.04 13.47C17.2 13.17 17.51 13.03 17.84 13.09C20.21 13.59 22 15.59 22 18H24V20H0V18H20.4H18H20C20 15.35 17.65 13.15 15 13.04V11.3C15.65 11.12 16.25 10.81 16.76 10.38C17.37 10.87 18.14 11.18 18.98 11.23V13.04C16.33 13.15 14 15.35 14 18H18H20.4H18C18 14.69 16.07 11.84 13.28 10.38C13.62 9.88 13.84 9.29 13.84 8.64C13.84 6.13 11.71 4 9.2 4C6.69 4 4.56 6.13 4.56 8.64C4.56 9.29 4.78 9.88 5.12 10.38C2.33 11.84 0.4 14.69 0.4 18H2.4C2.4 15.59 4.19 13.59 6.56 13.09C6.89 13.03 7.2 13.17 7.36 13.47L8.08 14.81C8.29 15.21 8.66 15.45 9.08 15.45H15.32C15.74 15.45 16.11 15.21 16.32 14.81L17.04 13.47C17.2 13.17 17.51 13.03 17.84 13.09C20.21 13.59 22 15.59 22 18H24V20H0V18H2V16H22V18ZM6.56 14.59C4.71 14.96 3.4 16.55 3.4 18H5.4C5.4 17.45 5.75 16.96 6.26 16.72C6.62 16.54 7.06 16.62 7.35 16.91L8.07 15.59C7.91 15.29 7.6 15.15 7.27 15.21C5.87 15.45 4.85 16.59 4.85 18H9.08C9.5 18 9.87 17.76 10.08 17.36L10.8 16.03C11.01 15.63 10.64 15.18 10.22 15.18H4.4C4.4 14.69 4.71 14.24 5.18 14.04C5.65 13.84 6.18 13.97 6.56 14.29V14.59ZM9.2 6.54C10.32 6.54 11.24 7.46 11.24 8.58C11.24 9.7 10.32 10.62 9.2 10.62C8.08 10.62 7.16 9.7 7.16 8.58C7.16 7.46 8.08 6.54 9.2 6.54Z"
+          fill="currentColor"
+          opacity="0.9"
         />
       </svg>
     </div>

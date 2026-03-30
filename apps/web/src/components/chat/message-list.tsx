@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useMessages } from "@/hooks/useChat";
 import { type Message } from "@/store/chatStore";
 import { Heart, Download, Edit, Image as ImageIcon, Reply } from "lucide-react";
@@ -9,6 +10,7 @@ import { GeneratingIndicator } from "./generating-indicator";
 import { ImageSkeleton } from "./image-skeleton";
 import { AIAvatar } from "@/components/common/ai-avatar";
 import { MoyuLogo } from "@/components/common/moyu-logo";
+import { ImageModal } from "@/components/common/image-modal";
 import { toast } from "react-hot-toast";
 
 interface MessageListProps {
@@ -22,7 +24,9 @@ interface MessageListProps {
 
 export function MessageList({ sessionId, isGenerating = false, onImageClick, onFavorite, onQuoteImage, onSendMessage }: MessageListProps) {
   const { messages, isSending, fetchMessages } = useMessages();
+  const { data: session } = useSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [modalImage, setModalImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (sessionId) {
@@ -33,6 +37,9 @@ export function MessageList({ sessionId, isGenerating = false, onImageClick, onF
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const userAvatar = session?.user?.avatar;
+  const userName = session?.user?.name || session?.user?.email?.[0]?.toUpperCase() || "U";
 
   if (!sessionId || messages.length === 0) {
     return (
@@ -77,6 +84,9 @@ export function MessageList({ sessionId, isGenerating = false, onImageClick, onF
             onImageClick={onImageClick}
             onFavorite={onFavorite}
             onQuoteImage={onQuoteImage}
+            userAvatar={userAvatar || undefined}
+            userName={userName}
+            onImageModal={(url) => setModalImage(url)}
           />
         ))}
         {isGenerating && (
@@ -90,6 +100,13 @@ export function MessageList({ sessionId, isGenerating = false, onImageClick, onF
         )}
         <div ref={messagesEndRef} />
       </div>
+      {modalImage && (
+        <ImageModal
+          src={modalImage}
+          alt="Preview"
+          onClose={() => setModalImage(null)}
+        />
+      )}
     </div>
   );
 }
@@ -99,9 +116,12 @@ interface MessageBubbleProps {
   onImageClick?: (imageUrl: string) => void;
   onFavorite?: (imageUrl: string) => void;
   onQuoteImage?: (imageUrl: string) => void;
+  userAvatar?: string;
+  userName?: string;
+  onImageModal?: (imageUrl: string) => void;
 }
 
-function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: MessageBubbleProps) {
+function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage, userAvatar, userName, onImageModal }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
   const handleFavorite = async (imageUrl: string) => {
@@ -158,9 +178,17 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={`flex items-start gap-3 max-w-[85%] md:max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}>
         {isUser ? (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium flex-shrink-0 bg-primary">
-            8
-          </div>
+          userAvatar ? (
+            <img
+              src={userAvatar}
+              alt="User"
+              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium flex-shrink-0 bg-primary">
+              {userName?.[0]?.toUpperCase() || "U"}
+            </div>
+          )
         ) : (
           <AIAvatar size="md" />
         )}
@@ -179,7 +207,11 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
               <img
                 src={getBlobProxyUrl(message.imageUrl)}
                 alt="Generated"
-                onClick={() => onImageClick?.(message.imageUrl!)}
+                onClick={() => onImageModal?.(getBlobProxyUrl(message.imageUrl!))}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
                 className="rounded-xl max-w-full cursor-pointer hover:opacity-90 transition-opacity"
               />
               <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
