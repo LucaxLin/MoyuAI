@@ -343,7 +343,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           width: imageWidth,
           height: imageHeight,
           aspectRatio: aspectRatio,
-          model: "minimax-image-01",
+          model: "image-01-live",
         },
       },
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { signIn, signOut, useSession, update } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useAuthStore, type User } from "@/store/authStore";
 import { authApi, userApi } from "@/lib/api";
 import { toast } from "react-hot-toast";
@@ -33,8 +33,8 @@ export function useAuth() {
       }
 
       const sessionResult = await authApi.getSession();
-      if (sessionResult.success && sessionResult.data?.user) {
-        setUser(sessionResult.data.user as User);
+      if (sessionResult.success && (sessionResult.data as { user?: User })?.user) {
+        setUser((sessionResult.data as { user: User }).user);
         toast.success("登录成功");
         return { success: true };
       } else {
@@ -67,12 +67,11 @@ export function useAuth() {
       
       console.log("updateProfile result:", result);
       
-      if (result.success && result.data?.user) {
-        const updatedUser = result.data.user as User;
+      if (result.success && (result.data as { user?: User })?.user) {
+        const updatedUser = (result.data as { user: User }).user;
         console.log("Updated user:", updatedUser);
         console.log("Updating with avatar:", updatedUser.avatar);
         setUser(updatedUser);
-        await update({ name: updatedUser.name, avatar: updatedUser.avatar });
         toast.success("更新成功");
         return { success: true };
       } else {
@@ -91,8 +90,8 @@ export function useAuth() {
     try {
       const result = await userApi.updateTheme(theme);
       
-      if (result.success && result.data?.user) {
-        setUser(result.data.user as User);
+      if (result.success && (result.data as { user?: User })?.user) {
+        setUser((result.data as { user: User }).user);
         return { success: true };
       } else {
         toast.error(result.error?.message || "更新失败");

@@ -15,7 +15,7 @@ export function SettingsPage() {
   const { user, updateProfile, updatePassword, updateTheme, logout, isLoading } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | undefined>(undefined);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const [name, setName] = useState("");
@@ -128,7 +128,7 @@ export function SettingsPage() {
       if (result.success && result.data?.url) {
         const avatarUrl = result.data.url;
         await updateProfile({ avatar: avatarUrl });
-        setAvatarPreview(null);
+        setAvatarPreview(undefined);
       } else {
         toast.error(result.error?.message || "头像上传失败");
       }
@@ -183,7 +183,7 @@ export function SettingsPage() {
                 {avatarPreview || user?.avatar ? (
                   <div className="relative">
                     <img
-                      src={avatarPreview || user?.avatar}
+                      src={avatarPreview || user?.avatar || ""}
                       alt="Avatar"
                       className="w-16 h-16 rounded-full object-cover"
                     />

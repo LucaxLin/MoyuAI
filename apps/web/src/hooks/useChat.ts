@@ -23,8 +23,8 @@ export function useSessions() {
       setLoading(true);
       const result = await sessionApi.list();
       
-      if (result.success && result.data?.sessions) {
-        setSessions(result.data.sessions as Session[]);
+      if (result.success && (result.data as { sessions?: Session[] })?.sessions) {
+        setSessions((result.data as { sessions: Session[] }).sessions);
       }
     } catch (error) {
       toast.error("获取会话列表失败");
@@ -37,8 +37,8 @@ export function useSessions() {
     try {
       const result = await sessionApi.create(title);
       
-      if (result.success && result.data?.session) {
-        const newSession = result.data.session as Session;
+      if (result.success && (result.data as { session?: Session })?.session) {
+        const newSession = (result.data as { session: Session }).session;
         addSession(newSession);
         setCurrentSession(newSession);
         toast.success("创建会话成功");
@@ -116,8 +116,8 @@ export function useMessages() {
       setSending(true);
       const result = await messageApi.list(sessionId);
       
-      if (result.success && result.data?.messages) {
-        setMessages(result.data.messages as Message[]);
+      if (result.success && (result.data as { messages?: Message[] })?.messages) {
+        setMessages((result.data as { messages: Message[] }).messages);
       }
     } catch (error) {
       toast.error("获取消息失败");
@@ -150,9 +150,9 @@ export function useMessages() {
         editRegion,
       });
       
-      if (result.success && result.data?.message) {
+      if (result.success && (result.data as { message?: Message })?.message) {
         setUploadedImage(null);
-        return { success: true, message: result.data.message };
+        return { success: true, message: (result.data as { message: Message }).message };
       } else {
         toast.error(result.error?.message || "发送消息失败");
         return { success: false, error: result.error };
@@ -188,7 +188,7 @@ export function useMessages() {
       const result = await imageApi.upload(file);
       
       if (result.success && result.data) {
-        const url = (result.data as { url: string }).url;
+        const url = (result.data as unknown as { url: string }).url;
         setUploadedImage(url);
         return { success: true, url };
       } else {

@@ -15,7 +15,7 @@ export async function generateImage(params: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "image-01",
+      model: "image-01-live",
       prompt: params.prompt,
       aspect_ratio: params.aspectRatio || "1:1",
       subject_reference: params.subjectReference,

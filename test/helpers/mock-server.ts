@@ -31,7 +31,7 @@ const mockMessage: Message = {
     prompt: '帮我画一幅日落海景',
     width: 1024,
     height: 1024,
-    model: 'minimax-image-01',
+    model: 'image-01',
   },
   createdAt: '2024-01-15T14:30:05Z',
 };

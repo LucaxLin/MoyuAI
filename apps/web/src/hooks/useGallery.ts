@@ -39,11 +39,9 @@ export function useGallery() {
       });
       
       if (result.success && result.data) {
-        const newImages = result.data.images as GalleryImage[];
-        const pagination = result.data.pagination as {
-          hasMore: boolean;
-          total: number;
-        };
+        const data = result.data as { images?: GalleryImage[]; pagination?: { hasMore: boolean; total: number } };
+        const newImages = data.images || [];
+        const pagination = data.pagination || { hasMore: false, total: 0 };
         
         if (reset) {
           setImages(newImages);
@@ -68,8 +66,8 @@ export function useGallery() {
       setLoading(true);
       const result = await imageApi.get(id);
       
-      if (result.success && result.data?.image) {
-        setCurrentImage(result.data.image as GalleryImage);
+      if (result.success && (result.data as { image?: GalleryImage })?.image) {
+        setCurrentImage((result.data as { image: GalleryImage }).image);
         return { success: true };
       } else {
         toast.error(result.error?.message || "获取图片失败");
@@ -87,8 +85,8 @@ export function useGallery() {
     try {
       const result = await imageApi.toggleFavorite(id);
       
-      if (result.success && result.data?.image) {
-        updateImage(id, { isFavorite: (result.data.image as GalleryImage).isFavorite });
+      if (result.success && (result.data as { image?: GalleryImage })?.image) {
+        updateImage(id, { isFavorite: (result.data as { image: GalleryImage }).image.isFavorite });
         toast.success("操作成功");
         return { success: true };
       } else {
@@ -136,6 +134,8 @@ export function useGallery() {
     currentImage,
     isLoading,
     hasMore,
+    filter,
+    sort,
     fetchImages,
     fetchImage,
     toggleFavorite,
