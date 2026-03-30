@@ -9,7 +9,7 @@ import { toast } from "react-hot-toast";
 import { getBlobProxyUrl } from "@/lib/blob-utils";
 interface ImageDetailPageProps {
   imageId: string;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function ImageDetailPage({ imageId, onBack }: ImageDetailPageProps) {
@@ -34,7 +34,7 @@ export function ImageDetailPage({ imageId, onBack }: ImageDetailPageProps) {
   const handleDelete = async () => {
     if (confirm("确定要删除这张图片吗？")) {
       await deleteImage(imageId);
-      onBack();
+      onBack?.();
     }
   };
 
@@ -92,7 +92,7 @@ export function ImageDetailPage({ imageId, onBack }: ImageDetailPageProps) {
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <button
-            onClick={onBack}
+            onClick={onBack ?? (() => router.push("/gallery"))}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
           >
             <ArrowLeft className="w-5 h-5" />
