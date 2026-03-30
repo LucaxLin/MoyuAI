@@ -8,6 +8,7 @@ import { getBlobProxyUrl } from "@/lib/blob-utils";
 import { GeneratingIndicator } from "./generating-indicator";
 import { ImageSkeleton } from "./image-skeleton";
 import { AIAvatar } from "@/components/common/ai-avatar";
+import { MoyuLogo } from "@/components/common/moyu-logo";
 import { toast } from "react-hot-toast";
 
 interface MessageListProps {
@@ -16,9 +17,10 @@ interface MessageListProps {
   onImageClick?: (imageUrl: string) => void;
   onFavorite?: (imageUrl: string) => void;
   onQuoteImage?: (imageUrl: string) => void;
+  onSendMessage?: (content: string) => void;
 }
 
-export function MessageList({ sessionId, isGenerating = false, onImageClick, onFavorite, onQuoteImage }: MessageListProps) {
+export function MessageList({ sessionId, isGenerating = false, onImageClick, onFavorite, onQuoteImage, onSendMessage }: MessageListProps) {
   const { messages, isSending, fetchMessages } = useMessages();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -32,21 +34,33 @@ export function MessageList({ sessionId, isGenerating = false, onImageClick, onF
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  if (!sessionId) {
+  if (!sessionId || messages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <ImageIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+      <div className="flex-1 flex items-center justify-center bg-cream-100 dark:bg-warm-dark p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-accent dark:bg-accent flex items-center justify-center overflow-hidden">
+            <MoyuLogo className="w-16 h-16" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-3">
             欢迎使用墨语
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-muted-foreground mb-6">
             通过自然语言描述，快速生成AI艺术作品
           </p>
-          <div className="text-sm text-gray-400 dark:text-gray-500 space-y-1">
-            <p>示例提示词：</p>
-            <p className="text-indigo-500 dark:text-indigo-400">帮我画一幅日落海景</p>
-            <p className="text-indigo-500 dark:text-indigo-400">一只可爱的橘猫在草地上玩耍</p>
+          <div className="text-sm space-y-2 bg-secondary dark:bg-secondary rounded-xl p-4">
+            <p className="text-muted-foreground">示例提示词：</p>
+            <button
+              onClick={() => onSendMessage?.("帮我画一幅日落海景")}
+              className="w-full text-left text-primary font-medium hover:text-primary/80 transition-colors"
+            >
+              帮我画一幅日落海景
+            </button>
+            <button
+              onClick={() => onSendMessage?.("一只可爱的橘猫在草地上玩耍")}
+              className="w-full text-left text-primary font-medium hover:text-primary/80 transition-colors"
+            >
+              一只可爱的橘猫在草地上玩耍
+            </button>
           </div>
         </div>
       </div>
@@ -54,8 +68,8 @@ export function MessageList({ sessionId, isGenerating = false, onImageClick, onF
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-3xl mx-auto space-y-4">
+    <div className="flex-1 overflow-y-auto bg-cream-100 dark:bg-warm-dark p-4">
+      <div className="max-w-4xl mx-auto space-y-4 w-full">
         {messages.map((message) => (
           <MessageBubble
             key={message.id}
@@ -68,7 +82,7 @@ export function MessageList({ sessionId, isGenerating = false, onImageClick, onF
         {isGenerating && (
           <div className="flex items-start gap-3">
             <AIAvatar size="md" />
-            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm flex-1 max-w-xl">
+            <div className="bg-card dark:bg-card rounded-xl px-4 py-3 shadow-sm flex-1 max-w-xl">
               <GeneratingIndicator message="正在生成图片，请稍候..." />
               <ImageSkeleton width={512} height={288} />
             </div>
@@ -142,9 +156,9 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div className={`flex items-start gap-3 max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}>
+      <div className={`flex items-start gap-3 max-w-[85%] md:max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}>
         {isUser ? (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0 bg-purple-600">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium flex-shrink-0 bg-primary">
             8
           </div>
         ) : (
@@ -152,10 +166,10 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
         )}
         <div className="flex flex-col gap-2">
           <div
-            className={`px-4 py-2 rounded-lg ${
+            className={`px-4 py-2 rounded-xl ${
               isUser
-                ? "bg-indigo-600 text-white"
-                : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                ? "bg-primary text-primary-foreground"
+                : "bg-card dark:bg-card text-foreground"
             }`}
           >
             <p className="whitespace-pre-wrap">{message.content}</p>
@@ -166,7 +180,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
                 src={getBlobProxyUrl(message.imageUrl)}
                 alt="Generated"
                 onClick={() => onImageClick?.(message.imageUrl!)}
-                className="rounded-lg max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                className="rounded-xl max-w-full cursor-pointer hover:opacity-90 transition-opacity"
               />
               <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
                 <button
@@ -174,7 +188,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
                     e.stopPropagation();
                     handleFavorite(message.imageUrl!);
                   }}
-                  className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 backdrop-blur-sm"
+                  className="p-2 bg-card/90 dark:bg-card/90 rounded-full shadow-md hover:bg-accent dark:hover:bg-accent backdrop-blur-sm"
                   title="收藏"
                 >
                   <Heart className="w-4 h-4 text-pink-500" />
@@ -184,7 +198,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
                     e.stopPropagation();
                     handleDownload(message.imageUrl!);
                   }}
-                  className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 backdrop-blur-sm"
+                  className="p-2 bg-card/90 dark:bg-card/90 rounded-full shadow-md hover:bg-accent dark:hover:bg-accent backdrop-blur-sm"
                   title="下载"
                 >
                   <Download className="w-4 h-4 text-blue-500" />
@@ -194,7 +208,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
                     e.stopPropagation();
                     handleQuoteImage(message.imageUrl!);
                   }}
-                  className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 backdrop-blur-sm"
+                  className="p-2 bg-card/90 dark:bg-card/90 rounded-full shadow-md hover:bg-accent dark:hover:bg-accent backdrop-blur-sm"
                   title="引用图片"
                 >
                   <Reply className="w-4 h-4 text-green-500" />
@@ -202,7 +216,7 @@ function MessageBubble({ message, onImageClick, onFavorite, onQuoteImage }: Mess
               </div>
             </div>
           )}
-          <p className={`text-xs text-gray-400 ${isUser ? "text-right" : ""}`}>
+          <p className={`text-xs text-muted-foreground ${isUser ? "text-right" : ""}`}>
             {new Date(message.createdAt).toLocaleString("zh-CN")}
           </p>
         </div>

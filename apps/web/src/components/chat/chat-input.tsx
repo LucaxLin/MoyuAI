@@ -79,26 +79,26 @@ export function ChatInput({
   };
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+    <div className="border-t border-border bg-card dark:bg-card p-4 safe-bottom">
+      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto w-full">
         {uploadedImage && (
           <div className="mb-3 relative inline-block">
             <img
               src={getBlobProxyUrl(uploadedImage)}
               alt="Uploaded"
-              className="h-20 w-20 object-cover rounded-lg"
+              className="h-20 w-20 object-cover rounded-xl"
             />
             <button
               type="button"
               onClick={handleRemoveImage}
-              className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full"
+              className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full"
             >
               <X className="w-3 h-3" />
             </button>
           </div>
         )}
         
-        <div className="flex items-end gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <input
             type="file"
             ref={fileInputRef}
@@ -112,9 +112,9 @@ export function ChatInput({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isDisabled || isUploading}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 md:p-3 hover:bg-accent dark:hover:bg-accent rounded-xl transition-colors disabled:opacity-50 flex-shrink-0"
           >
-            <ImageIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <ImageIcon className="w-5 h-5" />
           </button>
 
           <div className="flex-1 relative">
@@ -125,9 +125,9 @@ export function ChatInput({
               placeholder={isDisabled ? "正在生成中..." : "请描述你想要生成的图片..."}
               rows={1}
               disabled={isDisabled}
-              className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-500 disabled:opacity-50"
+              className="w-full px-4 py-2.5 md:py-3 bg-secondary dark:bg-secondary rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground disabled:opacity-50 transition-colors"
               style={{
-                minHeight: "42px",
+                minHeight: "44px",
                 maxHeight: "120px",
               }}
             />
@@ -136,15 +136,11 @@ export function ChatInput({
           <button
             type="submit"
             disabled={!content.trim() || isDisabled}
-            className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            className="p-2.5 md:p-3 bg-primary hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed text-primary-foreground rounded-xl transition-colors flex-shrink-0"
           >
             <Send className="w-5 h-5" />
           </button>
         </div>
-
-        <p className="text-xs text-gray-400 mt-2 text-center">
-          按 Enter 发送，Shift + Enter 换行
-        </p>
       </form>
     </div>
   );

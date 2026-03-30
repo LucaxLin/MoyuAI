@@ -29,18 +29,18 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen w-full flex items-center justify-center bg-cream-100 dark:bg-warm-dark py-12 px-4 safe-top safe-bottom">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h1 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             墨语 (MoyuAI)
           </h1>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             AI驱动的创意画布
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-2xl shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
                 邮箱地址
@@ -53,7 +53,7 @@ export function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                className="appearance-none relative block w-full px-4 py-3 border border-border rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card"
                 placeholder="邮箱地址"
               />
             </div>
@@ -70,13 +70,13 @@ export function LoginForm() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                  className="appearance-none relative block w-full px-4 py-3 border border-border rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card"
                   placeholder="密码"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-sm leading-5"
                 >
                   {showPassword ? "隐藏" : "显示"}
                 </button>
@@ -85,26 +85,26 @@ export function LoginForm() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div className="text-destructive text-sm text-center">{error}</div>
           )}
 
           <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? "登录中..." : "登录"}
             </button>
           </div>
 
           <div className="text-center">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-muted-foreground">
               还没有账号？{" "}
             </span>
             <Link
               href="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+              className="font-medium text-primary hover:text-primary/80"
             >
               去注册
             </Link>

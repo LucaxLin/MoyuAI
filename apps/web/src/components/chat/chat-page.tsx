@@ -11,6 +11,7 @@ import { type Session } from "@/store/chatStore";
 import { Menu, X, Moon, Sun, Settings, BookImage } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { MoyuLogo } from "@/components/common/moyu-logo";
 
 export function ChatPage({ sessionId }: { sessionId?: string }) {
   const router = useRouter();
@@ -18,10 +19,11 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
   const { data: session, status } = useSession();
   const { fetchMessages, addMessage, setUploadedImage } = useMessages();
   const { currentSession, sessions, fetchSessions, createSession, setCurrentSession } = useSessions();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [refImage, setRefImage] = useState<string | null>(null);
+  const [pendingMessage, setPendingMessage] = useState<{ content: string; imageUrl?: string | null } | null>(null);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -50,12 +52,47 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
     }
   }, [sessionId, sessions, setCurrentSession, currentSession]);
 
+  useEffect(() => {
+    if (sessionId && pendingMessage && currentSession?.id === sessionId) {
+      const { content, imageUrl } = pendingMessage;
+      setPendingMessage(null);
+      const sendPendingMessage = async () => {
+        await addMessage({
+          id: `temp-${Date.now()}`,
+          role: "user",
+          content,
+          imageUrl,
+          createdAt: new Date().toISOString(),
+        });
+
+        setIsGenerating(true);
+        try {
+          const response = await fetch(`/api/sessions/${sessionId}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content, imageUrl }),
+          });
+          const data = await response.json();
+          if (data.success && data.data?.message) {
+            await fetchMessages(sessionId);
+          }
+        } finally {
+          setIsGenerating(false);
+          setUploadedImage(null);
+        }
+      };
+      sendPendingMessage();
+    }
+  }, [sessionId, pendingMessage, currentSession]);
+
   const handleSelectSession = async (selectedSession: Session) => {
     if (selectedSession.id === sessionId) {
+      setSidebarOpen(false);
       return;
     }
     
     setCurrentSession(selectedSession);
+    setSidebarOpen(false);
     router.push(`/chat/${selectedSession.id}`);
   };
 
@@ -67,6 +104,8 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
       if (!result.success || !result.session) return;
       targetSession = result.session;
       setCurrentSession(targetSession);
+      setPendingMessage({ content, imageUrl });
+      setSidebarOpen(false);
       router.push(`/chat/${targetSession.id}`);
       return;
     }
@@ -118,9 +157,13 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   if (!mounted || status === "loading") {
     return (
-      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900" />
+      <div className="h-screen w-full flex flex-col bg-cream-100 dark:bg-warm-dark safe-top" />
     );
   }
 
@@ -130,36 +173,39 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen w-full flex flex-col bg-cream-100 dark:bg-warm-dark overflow-hidden">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <header className="bg-card dark:bg-card border-b border-border px-4 py-4 md:py-5 flex items-center justify-between flex-shrink-0 pt-safe-top">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-accent dark:hover:bg-accent rounded-xl transition-colors md:hidden"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">墨语</h1>
+          <div className="flex items-center gap-2">
+            <MoyuLogo className="w-10 h-10 md:w-12 md:h-12" />
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">墨语</h1>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             onClick={toggleTheme}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-accent dark:hover:bg-accent rounded-xl transition-colors"
           >
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
           <Link
             href="/gallery"
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-accent dark:hover:bg-accent rounded-xl transition-colors"
             title="我的图库"
           >
             <BookImage className="w-5 h-5" />
           </Link>
           <Link
             href="/settings"
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-accent dark:hover:bg-accent rounded-xl transition-colors"
           >
             <Settings className="w-5 h-5" />
           </Link>
@@ -167,25 +213,37 @@ export function ChatPage({ sessionId }: { sessionId?: string }) {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar Overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={closeSidebar}
+          />
+        )}
+        
+        {/* Sidebar Drawer */}
         <div
           className={`${
-            sidebarOpen ? "w-64" : "w-0"
-          } transition-all duration-300 overflow-hidden flex-shrink-0`}
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } fixed md:relative z-50 md:translate-x-0 md:z-auto h-screen md:h-full w-80 md:w-72 transition-transform duration-300 ease-in-out flex-shrink-0 top-0`}
         >
-          <SessionList
-            onSelectSession={handleSelectSession}
-            selectedSessionId={sessionId || currentSession?.id}
-          />
+          <div className="h-full overflow-y-auto bg-secondary dark:bg-secondary pt-safe-top">
+            <SessionList
+              onSelectSession={handleSelectSession}
+              selectedSessionId={sessionId || currentSession?.id}
+              onClose={closeSidebar}
+            />
+          </div>
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full min-w-0">
           <MessageList
             sessionId={sessionId || ""}
             isGenerating={isGenerating}
             onQuoteImage={(imageUrl) => setRefImage(imageUrl)}
+            onSendMessage={handleSendMessage}
           />
           <ChatInput
             sessionId={sessionId || ""}

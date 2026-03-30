@@ -141,24 +141,24 @@ export function SettingsPage() {
 
   if (status === "loading" || !mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-gray-500">加载中...</div>
+      <div className="min-h-screen w-full flex items-center justify-center bg-cream-100 dark:bg-warm-dark safe-top">
+        <div className="text-muted-foreground">加载中...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen w-full bg-cream-100 dark:bg-warm-dark flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">设置</h1>
+      <header className="bg-card dark:bg-card border-b border-border px-4 py-3 flex items-center justify-between flex-shrink-0 safe-top">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold text-foreground">设置</h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href="/chat"
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-accent dark:hover:bg-accent rounded-xl transition-colors"
           >
             <MessageSquare className="w-5 h-5" />
           </Link>
@@ -166,17 +166,18 @@ export function SettingsPage() {
       </header>
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Profile Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 w-full pb-safe-bottom">
+          {/* Profile Section */}
+          <div className="bg-card dark:bg-card rounded-2xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <UserIcon className="w-5 h-5" />
             个人信息
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 头像
               </label>
               <div className="flex items-center gap-4">
@@ -188,13 +189,13 @@ export function SettingsPage() {
                       className="w-16 h-16 rounded-full object-cover"
                     />
                     {isUploadingAvatar && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-white text-xl font-bold">
+                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold">
                     {name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
                   </div>
                 )}
@@ -209,45 +210,45 @@ export function SettingsPage() {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploadingAvatar}
-                    className="text-sm text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isUploadingAvatar ? "上传中..." : "点击更换头像"}
                   </button>
-                  <span className="text-xs text-gray-400">支持 JPG、PNG，最大 5MB</span>
+                  <span className="text-xs text-muted-foreground">支持 JPG、PNG，最大 5MB</span>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 昵称
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 placeholder="请输入昵称"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 邮箱
               </label>
               <input
                 type="email"
                 value={user?.email || ""}
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500"
+                className="w-full px-4 py-2.5 border border-border rounded-xl bg-muted text-muted-foreground"
               />
-              <p className="text-xs text-gray-400 mt-1">邮箱不可修改</p>
+              <p className="text-xs text-muted-foreground mt-1">邮箱不可修改</p>
             </div>
 
             <button
               onClick={handleSaveProfile}
               disabled={isLoading}
-              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+              className="w-full py-2.5 bg-primary hover:bg-primary/90 disabled:bg-muted text-primary-foreground rounded-xl transition-colors"
             >
               保存修改
             </button>
@@ -255,48 +256,48 @@ export function SettingsPage() {
         </div>
 
         {/* Security Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="bg-card dark:bg-card rounded-2xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Settings className="w-5 h-5" />
             账号安全
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 当前密码
               </label>
               <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 placeholder="请输入当前密码"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 新密码
               </label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 placeholder="请输入新密码（至少8位，包含数字和字母）"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 确认新密码
               </label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 placeholder="请再次输入新密码"
               />
             </div>
@@ -304,7 +305,7 @@ export function SettingsPage() {
             <button
               onClick={handleChangePassword}
               disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
-              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+              className="w-full py-2.5 bg-primary hover:bg-primary/90 disabled:bg-muted text-primary-foreground rounded-xl transition-colors"
             >
               修改密码
             </button>
@@ -312,20 +313,20 @@ export function SettingsPage() {
         </div>
 
         {/* Theme Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">偏好设置</h2>
+        <div className="bg-card dark:bg-card rounded-2xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground mb-4">偏好设置</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               主题
             </label>
-            <div className="flex gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => handleChangeTheme("light")}
-                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors ${
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-colors ${
                   selectedTheme === "light"
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
-                    : "border-gray-200 dark:border-gray-600 hover:border-indigo-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/50"
                 }`}
               >
                 <Sun className="w-6 h-6" />
@@ -334,10 +335,10 @@ export function SettingsPage() {
 
               <button
                 onClick={() => handleChangeTheme("dark")}
-                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors ${
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-colors ${
                   selectedTheme === "dark"
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
-                    : "border-gray-200 dark:border-gray-600 hover:border-indigo-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/50"
                 }`}
               >
                 <Moon className="w-6 h-6" />
@@ -346,10 +347,10 @@ export function SettingsPage() {
 
               <button
                 onClick={() => handleChangeTheme("system")}
-                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors ${
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-colors ${
                   selectedTheme === "system"
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
-                    : "border-gray-200 dark:border-gray-600 hover:border-indigo-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/50"
                 }`}
               >
                 <Monitor className="w-6 h-6" />
@@ -360,10 +361,10 @@ export function SettingsPage() {
         </div>
 
         {/* Logout */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+        <div className="bg-card dark:bg-card rounded-2xl p-6 shadow-sm">
           <button
             onClick={handleLogout}
-            className="w-full py-2 border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            className="w-full py-2.5 border-2 border-destructive text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
           >
             退出登录
           </button>

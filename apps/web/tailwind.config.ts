@@ -10,12 +10,19 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
         "2xl": "1400px",
+        "100%": "100%",
       },
     },
     extend: {
+      screens: {
+        "100%": "100%",
+        "mobile": { "max": "639px" },
+        "tablet": { "min": "640px", "max": "1023px" },
+        "desktop": { "min": "1024px" },
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -50,11 +57,33 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        cream: {
+          50: "#fefcf9",
+          100: "#fdf8f3",
+          200: "#faf0e6",
+          300: "#f5e6d3",
+          400: "#eddcc6",
+          500: "#e5d0b3",
+          600: "#d4b896",
+          700: "#c4a67a",
+          800: "#b08d5b",
+          900: "#9a7343",
+        },
+        warm: {
+          light: "#fff8f0",
+          dark: "#2d2420",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      spacing: {
+        "safe-top": "env(safe-area-inset-top)",
+        "safe-bottom": "env(safe-area-inset-bottom)",
+        "safe-left": "env(safe-area-inset-left)",
+        "safe-right": "env(safe-area-inset-right)",
       },
       keyframes: {
         "accordion-down": {

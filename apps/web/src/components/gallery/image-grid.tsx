@@ -10,7 +10,7 @@ interface ImageGridProps {
 
 export function ImageGrid({ images, onImageClick }: ImageGridProps) {
   return (
-    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4">
       {images.map((image) => (
         <div key={image.id} className="break-inside-avoid">
           <ImageCard image={image} onClick={() => onImageClick(image.id)} />

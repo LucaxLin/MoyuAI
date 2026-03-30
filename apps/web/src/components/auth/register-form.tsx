@@ -138,20 +138,20 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen w-full flex items-center justify-center bg-cream-100 dark:bg-warm-dark py-12 px-4 safe-top safe-bottom">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h1 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             墨语 (MoyuAI)
           </h1>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             {step === "form" ? "创建您的账号" : "输入验证码"}
           </p>
         </div>
 
         {step === "form" ? (
           <form className="mt-8 space-y-6" onSubmit={handleSendCode}>
-            <div className="rounded-md shadow-sm -space-y-px">
+            <div className="rounded-2xl shadow-sm space-y-4">
               <div>
                 <label htmlFor="email" className="sr-only">
                   邮箱地址
@@ -164,7 +164,7 @@ export function RegisterForm() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                  className="appearance-none relative block w-full px-4 py-3 border border-border rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card"
                   placeholder="邮箱地址"
                 />
               </div>
@@ -179,7 +179,7 @@ export function RegisterForm() {
                   required
                   value={password}
                   onChange={(e) => handlePasswordChange(e.target.value)}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                  className="appearance-none relative block w-full px-4 py-3 border border-border rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card"
                   placeholder="密码 (至少8位，包含数字和字母)"
                 />
               </div>
@@ -194,36 +194,36 @@ export function RegisterForm() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                  className="appearance-none relative block w-full px-4 py-3 border border-border rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card"
                   placeholder="确认密码"
                 />
               </div>
             </div>
 
             {passwordError && (
-              <div className="text-red-500 text-sm">{passwordError}</div>
+              <div className="text-destructive text-sm">{passwordError}</div>
             )}
             {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
+              <div className="text-destructive text-sm text-center">{error}</div>
             )}
 
             <div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? "发送中..." : "获取验证码"}
               </button>
             </div>
 
             <div className="text-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 已有账号？{" "}
               </span>
               <Link
                 href="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                className="font-medium text-primary hover:text-primary/80"
               >
                 去登录
               </Link>
@@ -231,7 +231,7 @@ export function RegisterForm() {
           </form>
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleVerify}>
-            <div className="rounded-md shadow-sm">
+            <div className="rounded-2xl shadow-sm">
               <div>
                 <label htmlFor="code" className="sr-only">
                   验证码
@@ -244,21 +244,21 @@ export function RegisterForm() {
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 text-center text-lg tracking-widest"
+                  className="appearance-none relative block w-full px-4 py-3 border border-border rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card text-center text-lg tracking-widest"
                   placeholder="请输入6位验证码"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
+              <div className="text-destructive text-sm text-center">{error}</div>
             )}
 
             <div className="flex flex-col space-y-3">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? "验证中..." : "确认注册"}
               </button>
@@ -267,7 +267,7 @@ export function RegisterForm() {
                 type="button"
                 onClick={handleResendCode}
                 disabled={countdown > 0 || isLoading}
-                className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 disabled:opacity-50"
+                className="text-sm text-primary hover:text-primary/80 disabled:opacity-50"
               >
                 {countdown > 0 ? `${countdown}秒后可重新发送` : "重新发送验证码"}
               </button>
@@ -277,7 +277,7 @@ export function RegisterForm() {
               <button
                 type="button"
                 onClick={() => setStep("form")}
-                className="text-sm text-gray-600 hover:text-gray-500 dark:text-gray-400"
+                className="text-sm text-muted-foreground hover:text-foreground"
               >
                 返回上一步
               </button>

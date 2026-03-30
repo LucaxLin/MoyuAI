@@ -7,7 +7,7 @@ import { authApi, userApi } from "@/lib/api";
 import { toast } from "react-hot-toast";
 
 export function useAuth() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update: updateSession } = useSession();
   const { user, isAuthenticated, isLoading, setUser, setLoading, logout: storeLogout } = useAuthStore();
 
   useEffect(() => {
@@ -72,6 +72,12 @@ export function useAuth() {
         console.log("Updated user:", updatedUser);
         console.log("Updating with avatar:", updatedUser.avatar);
         setUser(updatedUser);
+        
+        await updateSession({
+          name: updatedUser.name,
+          avatar: updatedUser.avatar,
+        });
+        
         toast.success("更新成功");
         return { success: true };
       } else {
@@ -84,7 +90,7 @@ export function useAuth() {
       toast.error("更新失败，请稍后重试");
       return { success: false };
     }
-  }, [setUser]);
+  }, [setUser, updateSession]);
 
   const updateTheme = useCallback(async (theme: "light" | "dark" | "system") => {
     try {

@@ -9,16 +9,16 @@ interface ImageSkeletonProps {
 export function ImageSkeleton({ width = 512, height = 288, progress }: ImageSkeletonProps) {
   return (
     <div 
-      className="relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-700"
-      style={{ width, height }}
+      className="relative overflow-hidden rounded-xl bg-muted dark:bg-muted max-w-full"
+      style={{ aspectRatio: `${width} / ${height}` }}
     >
       {/* 骨架屏动画 */}
-      <div className="absolute inset-0 -translate-x-full animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700" />
+      <div className="absolute inset-0 -translate-x-full animate-pulse bg-gradient-to-r from-muted via-accent to-muted dark:from-muted dark:via-accent dark:to-muted" />
       
       {/* 加载图标 */}
       <div className="absolute inset-0 flex items-center justify-center">
         <svg
-          className="w-12 h-12 text-gray-400 dark:text-gray-500 animate-spin"
+          className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground animate-spin"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -40,7 +40,7 @@ export function ImageSkeleton({ width = 512, height = 288, progress }: ImageSkel
       
       {/* 百分比进度 */}
       {progress !== undefined && (
-        <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+        <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-lg">
           {Math.round(progress)}%
         </div>
       )}
